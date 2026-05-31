@@ -5,46 +5,61 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Checkout build system (cursedyomi-extensions)
+        uses: actions/checkout@v4
+        with:
+          repository: Claudemirovsky/cursedyomi-extensions
+          ref: master
+          path: build-system
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: 21
+          distribution: zulu
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build extension APK
-        run: ./gradlew :extension:assembleRelease --no-daemon
-        continue-on-error: true
+      - name: Copy extension source to build system
+        run: |
+          mkdir -p build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes
+          cp -r extension/src/main/java/eu/kanade/tachiyomi/animeextension/br/meusanimes/* build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/
+          cp extension/src/main/AndroidManifest.xml build-system/src/pt/meusanimes/
+          cat > build-system/src/pt/meusanimes/build.gradle << 'GRADLE'
+          ext {
+              extName = 'Meus Animes'
+              extClass = '.MeusAnimesBlog'
+              extVersionCode = 1
+          }
+          apply from: "$rootDir/common.gradle"
+          GRADLE
 
-      - name: Find and rename APK
+      - name: Fix package references in source
+        run: |
+          sed -i 's/package eu.kanade.tachiyomi.animeextension.br.meusanimes/package eu.kanade.tachiyomi.animeextension.pt.meusanimes/g' \
+            build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/*.kt
+
+      - name: Build APK
+        working-directory: build-system
+        run: ./gradlew -p src pt:meusanimes:assembleDebug
+
+      - name: Copy APK to repo
         run: |
           mkdir -p repo
-          APK=$(find extension/build -name "*.apk" -type f 2>/dev/null | head -1)
-          if [ -n "$APK" ]; then
-            cp "$APK" "repo/aniyomi-br.meusanimes-v1.0.0.apk"
-            echo "APK_BUILT=true" >> $GITHUB_ENV
-          else
-            echo "APK_BUILT=false" >> $GITHUB_ENV
-            echo "No APK found - build failed"
-          fi
-          ls -la repo/ 2>/dev/null || echo "repo/ empty"
+          find build-system -name "*.apk" -type f
+          cp build-system/src/pt/meusanimes/build/outputs/apk/debug/*.apk repo/aniyomi-br.meusanimes-v1.0.0.apk
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        if: env.APK_BUILT == 'true'
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: MeusAnimesBlog v1.0.${{ github.run_number }}
-          files: repo/aniyomi-br.meusanimes-v1.0.0.apk
-          generate_release_notes: true
+      - name: Commit and push APK
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add repo/
+          git diff --cached --quiet || git commit -m "chore: update APK"
+          git push
