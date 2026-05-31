@@ -60,7 +60,22 @@ jobs:
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug 2>&1
+        continue-on-error: true
+        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tee /tmp/gradle.log
+
+      - name: Show build errors
+        if: always()
+        working-directory: build-system
+        run: |
+          echo "::group::BUILD ERRORS"
+          grep -n "e:\|error:\|Error:\|FAILED\|Exception\|Unresolved\|unresolved\|cannot find symbol\|does not override" /tmp/gradle.log | head -30 | while read line; do echo "::error::$line"; done
+          echo "::endgroup::"
+          echo "::group::GRADLE FAILURE"
+          grep -A5 "FAILURE:" /tmp/gradle.log | head -20
+          echo "::endgroup::"
+          echo "::group::TAIL"
+          tail -30 /tmp/gradle.log
+          echo "::endgroup::"
 
       - name: Copy APK to repo
         run: |
