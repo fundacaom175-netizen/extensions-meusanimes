@@ -51,7 +51,9 @@ jobs:
               extVersionCode = 1
           }
           apply from: "$rootDir/common.gradle"
-
+          tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+              kotlinOptions.freeCompilerArgs += "-Xskip-metadata-version-check"
+          }
           GRADLE
 
       - name: Fix package references in source
