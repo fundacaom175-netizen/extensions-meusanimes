@@ -60,9 +60,7 @@ jobs:
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        shell: bash
-        run: |
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tail -200
+        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug 2>&1
 
       - name: Copy APK to repo
         run: |
