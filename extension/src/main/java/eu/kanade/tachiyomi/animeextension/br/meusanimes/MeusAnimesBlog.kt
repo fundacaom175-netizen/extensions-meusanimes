@@ -146,7 +146,6 @@ class MeusAnimesBlog : AnimeHttpSource() {
                     lazy = true,
                 ),
             )
-            }
         }
 
         return listOf(
