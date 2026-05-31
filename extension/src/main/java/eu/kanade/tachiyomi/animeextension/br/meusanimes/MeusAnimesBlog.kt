@@ -121,24 +121,6 @@ class MeusAnimesBlog : AnimeHttpSource() {
         return emptyList()
     }
 
-    override fun videoListParse(response: Response): List<Video> {
-        val doc = response.asJsoup()
-        val iframe = doc.select("#playex iframe").first() ?: return emptyList()
-        val src = iframe.attr("src")
-
-        val hashMatch = Regex("#/video/(\\d+)/(\\d+)/(\\d+)/").find(src)
-        if (hashMatch == null) {
-            val quality = doc.select(".qualidade").text().ifBlank { "HD" }
-            return listOf(Video(src, "Servidor 1 ($quality)", src))
-        }
-
-        val (tmdb, season, episode) = hashMatch.destructured
-        val direct = resolveEpisodeVideo(tmdb, season, episode)
-        if (direct.isNotEmpty()) return direct
-
-        return listOf(Video(src, "Servidor 1", src))
-    }
-
     override suspend fun getHosterList(episode: SEpisode): List<Hoster> {
         val doc = client.newCall(GET("$baseUrl${episode.url}")).execute().asJsoup()
         val iframe = doc.select("#playex iframe").first() ?: return emptyList()
@@ -167,6 +149,10 @@ class MeusAnimesBlog : AnimeHttpSource() {
         hoster.videoList?.let { return it }
         return emptyList()
     }
+
+    override fun seasonListParse(response: Response): List<SAnime> = emptyList()
+
+    override fun hosterListParse(response: Response): List<Hoster> = emptyList()
 
     override fun videoUrlParse(response: Response): String {
         return response.request.url.toString()
