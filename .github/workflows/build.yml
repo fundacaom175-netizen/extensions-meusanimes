@@ -46,6 +46,8 @@ jobs:
           # Upgrade JVM target from 1.8 to 17 (Kotlin 2.2.0 drops 1.8 support)
           sed -i 's/VERSION_1_8/VERSION_17/g' build-system/common.gradle
           sed -i 's/VERSION_1_8/VERSION_17/g' build-system/build.gradle.kts
+          # Remove Kotlin dependencies from buildSrc (kotlin-dsl provides its own Kotlin)
+          sed -i '/libs\.gradle\.kotlin/d' build-system/buildSrc/build.gradle.kts
 
       - name: Copy extension source to build system
         run: |
