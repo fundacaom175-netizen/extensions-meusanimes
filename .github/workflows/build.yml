@@ -56,7 +56,41 @@ jobs:
           CI_CHUNK_NUM: "0"
         run: ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace
 
+      - name: Capture error log on failure
+        if: failure()
+        run: |
+          mkdir -p repo
+          find build-system -name "*.log" -path "*/kotlin/*" | head -5 | while read f; do
+            echo "=== $f ===" >> repo/gradle-error.log
+            cat "$f" >> repo/gradle-error.log
+          done
+          find build-system -name "*.txt" -path "*/reports/*" | head -5 | while read f; do
+            echo "=== $f ===" >> repo/gradle-error.log
+            cat "$f" >> repo/gradle-error.log
+          done
+          # Also try getting the build output
+          echo "=== Tasks that failed ===" >> repo/gradle-error.log
+          find build-system -name "output.txt" -o -name "*.out" | head -5 | while read f; do
+            tail -50 "$f" >> repo/gradle-error.log 2>/dev/null || true
+          done
+
+      - name: Push debug error log
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin debug-gradle-log || git checkout --orphan debug-gradle-log
+          git checkout debug-gradle-log 2>/dev/null || git checkout --orphan debug-gradle-log
+          if [ -f repo/gradle-error.log ]; then
+            cp repo/gradle-error.log gradle-error.log
+            git add gradle-error.log
+            git commit -m "debug: update build error log"
+            git push origin debug-gradle-log --force
+          fi
+          git checkout main
+
       - name: Copy APK to repo
+        if: success()
         run: |
           rm -f repo/apk/*.apk
           mkdir -p repo/apk repo/icon
@@ -65,6 +99,7 @@ jobs:
           cp "$apk" repo/apk/aniyomi-pt.meusanimes-v14.1.apk
 
       - name: Commit and push APK
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
