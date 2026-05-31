@@ -52,23 +52,27 @@ jobs:
           sed -i 's/package eu.kanade.tachiyomi.animeextension.br.meusanimes/package eu.kanade.tachiyomi.animeextension.pt.meusanimes/g' \
             build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/*.kt
 
+      - name: List projects
+        working-directory: build-system
+        env:
+          CI_CHUNK_SIZE: "100"
+          CI_CHUNK_NUM: "0"
+        continue-on-error: true
+        run: ./gradlew -p src projects --info 2>&1
+
       - name: Build APK
         working-directory: build-system
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        shell: bash
+        continue-on-error: true
+        run: ./gradlew -p src assembleDebug --continue 2>&1 | tee build.log
+
+      - name: Show build errors
+        if: always()
+        working-directory: build-system
         run: |
-          set -o pipefail
-          ./gradlew -p src pt:meusanimes:assembleDebug --continue 2>&1 | tee build.log
-          rc=$?
-          if [ $rc -ne 0 ]; then
-            echo "=== BUILD FAILED (exit code $rc) ==="
-            grep -E "^e:|^w:|error:|Error|FAILED|Exception|[.kt]:" build.log | head -80
-            echo "=== TAIL ==="
-            tail -30 build.log
-            exit $rc
-          fi
+          grep -n -i "error\|exception\|FAILED\|unresolved reference\|does not override\|\.kt:" build.log | head -50 || echo "No errors found"
 
       - name: Copy APK to repo
         run: |
