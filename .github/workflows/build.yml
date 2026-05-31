@@ -64,25 +64,34 @@ jobs:
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace
+        run: |
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>../gradle-crash.log || {
+            EXIT_CODE=$?
+            cat ../gradle-crash.log
+            exit $EXIT_CODE
+          }
 
       - name: Capture error log on failure
         if: failure()
         run: |
           mkdir -p repo
-          find build-system -name "*.log" -path "*/kotlin/*" | head -5 | while read f; do
+          # Capture gradle crash log
+          if [ -f gradle-crash.log ]; then
+            cp gradle-crash.log repo/gradle-error.log
+          fi
+          # Try to get kotlin compile errors from .gradle
+          find build-system -name "*.log" 2>/dev/null | head -10 | while read f; do
             echo "=== $f ===" >> repo/gradle-error.log
-            cat "$f" >> repo/gradle-error.log
+            head -100 "$f" >> repo/gradle-error.log 2>/dev/null
           done
-          find build-system -name "*.txt" -path "*/reports/*" | head -5 | while read f; do
+          # Try reports
+          find build-system -path "*/reports/*" -name "*.html" 2>/dev/null | head -3 | while read f; do
             echo "=== $f ===" >> repo/gradle-error.log
-            cat "$f" >> repo/gradle-error.log
           done
-          # Also try getting the build output
-          echo "=== Tasks that failed ===" >> repo/gradle-error.log
-          find build-system -name "output.txt" -o -name "*.out" | head -5 | while read f; do
-            tail -50 "$f" >> repo/gradle-error.log 2>/dev/null || true
-          done
+          # If still nothing, log build tree
+          if [ ! -s repo/gradle-error.log ]; then
+            echo "No error log files found" > repo/gradle-error.log
+          fi
 
       - name: Push debug error log
         if: failure()
