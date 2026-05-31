@@ -53,54 +53,12 @@ jobs:
         run: |
           sed -i '/freeCompilerArgs += /a\        freeCompilerArgs += "-Xskip-metadata-version-check"' build-system/common.gradle
 
-      - name: Force extensions-lib version to 14
-        run: |
-          cat >> build-system/gradle.properties << 'EOF'
-          aniYomiLibVersion=14
-          EOF
-
       - name: Build APK
         working-directory: build-system
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        run: |
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tee ../gradle-build.log
-          exit ${PIPESTATUS[0]}
-
-      - name: Capture error log on failure
-        if: failure()
-        run: |
-          mkdir -p repo
-          # Copy full gradle log (will overwrite if exists)
-          if [ -f gradle-build.log ]; then
-            cp gradle-build.log repo/gradle-error.log
-          fi
-          # Append kotlin compile errors from .gradle if found
-          find build-system -name "*.log" -path "*kotlin*" 2>/dev/null | head -5 | while read f; do
-            echo "=== $f ===" >> repo/gradle-error.log
-            head -100 "$f" >> repo/gradle-error.log 2>/dev/null
-          done
-          # If still empty, list dirs
-          if [ ! -s repo/gradle-error.log ]; then
-            echo "No error log files found - build tree:" > repo/gradle-error.log
-            ls -la build-system/ >> repo/gradle-error.log 2>/dev/null
-          fi
-
-      - name: Push debug error log
-        if: failure()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin debug-gradle-log || git checkout --orphan debug-gradle-log
-          git checkout debug-gradle-log 2>/dev/null || git checkout --orphan debug-gradle-log
-          if [ -f repo/gradle-error.log ]; then
-            cp repo/gradle-error.log gradle-error.log
-            git add gradle-error.log
-            git commit -m "debug: update build error log"
-            git push origin debug-gradle-log --force
-          fi
-          git checkout main
+        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace
 
       - name: Copy APK to repo
         if: success()
