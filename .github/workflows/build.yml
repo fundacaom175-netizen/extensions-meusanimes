@@ -59,15 +59,15 @@ jobs:
           CI_CHUNK_NUM: "0"
         shell: bash
         run: |
-          set -o pipefail
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tee gradle.log
-          rc=$?
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tee gradle.log; rc=${PIPESTATUS[0]}
+          echo "GRADLE EXIT CODE=$rc"
           if [ $rc -ne 0 ]; then
-            echo "::error::GRADLE EXIT CODE $rc"
-            grep -n "^e:" gradle.log | head -5 | while read line; do echo "::error::$line"; done
-            echo "::group::Full Gradle log tail"
-            tail -100 gradle.log
-            echo "::endgroup::"
+            echo "=== BUILD ERRORS ==="
+            grep -n "^e:" gradle.log | head -20
+            echo "=== TAIL ==="
+            tail -50 gradle.log
+          else
+            echo "BUILD SUCCESSFUL"
           fi
           exit $rc
 
