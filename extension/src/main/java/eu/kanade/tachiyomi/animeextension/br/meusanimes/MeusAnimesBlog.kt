@@ -82,14 +82,14 @@ class MeusAnimesBlog : AnimeHttpSource() {
 
     override fun episodeListParse(response: Response): List<SEpisode> {
         val doc = response.asJsoup()
-        return doc.select("#seasons .epi-item").mapNotNull { el ->
-            val link = el.select("a").first() ?: return@mapNotNull null
+        return doc.select("#seasons ul.episodios li").mapNotNull { el ->
+            val link = el.select(".episodiotitle a").first() ?: return@mapNotNull null
             val href = link.attr("href")
             if (href.isBlank()) return@mapNotNull null
             val epNum = extractEpNum(el)
             SEpisode.create().apply {
                 setUrlWithoutDomain(href)
-                name = el.select(".epi-title").text().ifBlank { "Episodio $epNum" }
+                name = link.text().ifBlank { "Episodio $epNum" }
                 episode_number = epNum.toFloat()
                 date_upload = 0L
             }
@@ -119,9 +119,9 @@ class MeusAnimesBlog : AnimeHttpSource() {
     }
 
     private fun extractEpNum(el: org.jsoup.nodes.Element): String {
-        val epiNum = el.select(".epi-num").text()
+        val numerando = el.select(".numerando").text()
         val regex = Regex("""\d+(?:\.\d+)?""")
-        val afterDash = epiNum.substringAfter(" - ").trim()
+        val afterDash = numerando.substringAfter(" - ").trim()
         return regex.find(afterDash)?.value ?: "1"
     }
 }
