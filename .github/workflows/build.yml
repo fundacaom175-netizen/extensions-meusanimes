@@ -61,19 +61,7 @@ jobs:
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        shell: bash
-        run: |
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tee gradle.log; rc=${PIPESTATUS[0]}
-          echo "GRADLE EXIT CODE=$rc"
-          if [ $rc -ne 0 ]; then
-            echo "=== BUILD ERRORS ==="
-            grep -n "^e:" gradle.log | head -20
-            echo "=== TAIL ==="
-            tail -50 gradle.log
-          else
-            echo "BUILD SUCCESSFUL"
-          fi
-          exit $rc
+        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug
 
       - name: Copy APK to repo
         run: |

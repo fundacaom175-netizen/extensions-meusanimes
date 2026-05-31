@@ -113,7 +113,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
                         val source = rawVideo.getJSONObject(i)
                         val url = source.getString("file")
                         val label = source.optString("label", "Servidor ${i + 1}")
-                        Video(url, label, url)
+                        Video(videoUrl = url, videoTitle = label)
                     }
                 }
             }
