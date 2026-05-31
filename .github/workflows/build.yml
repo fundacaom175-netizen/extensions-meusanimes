@@ -52,32 +52,20 @@ jobs:
           sed -i 's/package eu.kanade.tachiyomi.animeextension.br.meusanimes/package eu.kanade.tachiyomi.animeextension.pt.meusanimes/g' \
             build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/*.kt
 
-      - name: Build APK (save logs)
+      - name: Build APK
         working-directory: build-system
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        continue-on-error: true
-        run: |
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --continue --stacktrace 2>&1 > gradle.log
-          echo "EXIT_CODE=$?" >> $GITHUB_ENV
-
-      - name: Show tail of build log
-        if: always()
-        working-directory: build-system
-        run: tail -200 gradle.log
-
-      - name: Show compilation errors
-        if: always()
-        working-directory: build-system
-        run: grep -n "^e:" gradle.log | head -50 || echo "No Kotlin compile errors"
+        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug
 
       - name: Copy APK to repo
         run: |
           rm -f repo/apk/*.apk
           mkdir -p repo/apk repo/icon
-          find build-system -name "*.apk" -type f
-          cp build-system/src/pt/meusanimes/build/outputs/apk/debug/*.apk repo/apk/aniyomi-pt.meusanimes-v14.1.apk
+          apk=$(find build-system -name "*.apk" -type f | head -1)
+          echo "Found APK: $apk"
+          cp "$apk" repo/apk/aniyomi-pt.meusanimes-v14.1.apk
 
       - name: Commit and push APK
         run: |
