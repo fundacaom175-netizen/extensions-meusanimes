@@ -37,6 +37,21 @@ class MeusAnimesBlog : AnimeHttpSource() {
         return GET("$baseUrl/page/$page/?s=$query")
     }
 
+    override fun latestUpdatesRequest(page: Int) = GET("$baseUrl/lancamento/page/$page/")
+
+    override fun latestUpdatesParse(response: Response): AnimesPage {
+        val doc = response.asJsoup()
+        val animes = doc.select("article.item.tvshows").map { el ->
+            SAnime.create().apply {
+                title = el.select("h3 a").text()
+                setUrlWithoutDomain(el.select("h3 a").attr("href"))
+                thumbnail_url = el.select("img").attr("src")
+            }
+        }
+        val hasNext = doc.select("a.next").any()
+        return AnimesPage(animes, hasNext)
+    }
+
     override fun searchAnimeParse(response: Response): AnimesPage {
         val doc = response.asJsoup()
         val animes = doc.select("article.item.tvshows").mapNotNull { el ->
