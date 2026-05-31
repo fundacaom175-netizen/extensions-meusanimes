@@ -33,7 +33,6 @@ jobs:
         run: |
           sed -i 's/kotlin_version = "2.0.20"/kotlin_version = "2.2.0"/' build-system/gradle/libs.versions.toml
           sed -i 's/serialization_version = "1.7.3"/serialization_version = "1.9.0"/' build-system/gradle/libs.versions.toml
-          sed -i 's/coroutines_version = "1.9.0"/coroutines_version = "1.10.2"/' build-system/gradle/libs.versions.toml
           sed -i 's/version = "14"/version = "v16"/' build-system/gradle/libs.versions.toml
 
       - name: Copy extension source to build system
@@ -61,7 +60,9 @@ jobs:
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug
+        shell: bash
+        run: |
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tail -200
 
       - name: Copy APK to repo
         run: |
