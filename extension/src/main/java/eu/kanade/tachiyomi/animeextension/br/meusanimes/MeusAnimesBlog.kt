@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.animeextension.br.meusanimes
 
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 import eu.kanade.tachiyomi.animesource.model.AnimesPage
+import eu.kanade.tachiyomi.animesource.model.Hoster
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.animesource.model.SEpisode
 import eu.kanade.tachiyomi.animesource.model.Video
@@ -99,25 +100,12 @@ class MeusAnimesBlog : AnimeHttpSource() {
             .sortedByDescending { it.episode_number }
     }
 
-    override fun videoListParse(response: Response): List<Video> {
-        val doc = response.asJsoup()
-        val iframe = doc.select("#playex iframe").first() ?: return emptyList()
-        val src = iframe.attr("src")
-
-        val hashMatch = Regex("#/video/(\\d+)/(\\d+)/(\\d+)/").find(src)
-        if (hashMatch == null) {
-            val quality = doc.select(".qualidade").text().ifBlank { "HD" }
-            return listOf(Video(src, "Servidor 1 ($quality)", src))
-        }
-
-        val (tmdb, season, episode) = hashMatch.destructured
+    private fun resolveEpisodeVideo(tmdb: String, season: String, episode: String): List<Video> {
         val apiUrl = "https://serv01.meusdoramas.club/posts/get-video.php?tmdb=$tmdb&season_number=$season&episode_number=$episode"
-
         try {
             val apiResponse = client.newCall(GET(apiUrl)).execute()
             val body = apiResponse.body!!.string()
             val json = JSONObject(body)
-
             if (json.optBoolean("success", false)) {
                 val rawVideo = json.get("videoUrl")
                 if (rawVideo is JSONArray) {
@@ -130,8 +118,54 @@ class MeusAnimesBlog : AnimeHttpSource() {
                 }
             }
         } catch (_: Exception) {}
+        return emptyList()
+    }
+
+    override fun videoListParse(response: Response): List<Video> {
+        val doc = response.asJsoup()
+        val iframe = doc.select("#playex iframe").first() ?: return emptyList()
+        val src = iframe.attr("src")
+
+        val hashMatch = Regex("#/video/(\\d+)/(\\d+)/(\\d+)/").find(src)
+        if (hashMatch == null) {
+            val quality = doc.select(".qualidade").text().ifBlank { "HD" }
+            return listOf(Video(src, "Servidor 1 ($quality)", src))
+        }
+
+        val (tmdb, season, episode) = hashMatch.destructured
+        val direct = resolveEpisodeVideo(tmdb, season, episode)
+        if (direct.isNotEmpty()) return direct
 
         return listOf(Video(src, "Servidor 1", src))
+    }
+
+    override suspend fun getHosterList(episode: SEpisode): List<Hoster> {
+        val doc = client.newCall(GET("$baseUrl${episode.url}")).execute().asJsoup()
+        val iframe = doc.select("#playex iframe").first() ?: return emptyList()
+        val src = iframe.attr("src")
+
+        val hashMatch = Regex("#/video/(\\d+)/(\\d+)/(\\d+)/").find(src)
+        if (hashMatch != null) {
+            val (tmdb, season, ep) = hashMatch.destructured
+            val direct = resolveEpisodeVideo(tmdb, season, ep)
+            if (direct.isNotEmpty()) {
+                return listOf(Hoster(
+                    hosterName = "MeusAnimes",
+                    videoList = direct
+                ))
+            }
+        }
+
+        return listOf(Hoster(
+            hosterUrl = src,
+            hosterName = "Servidor 1",
+            lazy = true
+        ))
+    }
+
+    override suspend fun getVideoList(hoster: Hoster): List<Video> {
+        hoster.videoList?.let { return it }
+        return emptyList()
     }
 
     override fun videoUrlParse(response: Response): String {
