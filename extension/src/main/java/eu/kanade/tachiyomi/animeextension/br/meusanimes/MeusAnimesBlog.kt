@@ -1,10 +1,13 @@
 package eu.kanade.tachiyomi.animeextension.br.meusanimes
 
+import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.animesource.model.SEpisode
 import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.util.asJsoup
+import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Document
 
@@ -88,7 +91,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
 
     private fun parseStatus(text: String): Int {
         return when {
-            text.contains("Em Lançamento", ignoreCase = true) -> SAnime.ONGOING
+            text.contains("Em Lancamento", ignoreCase = true) -> SAnime.ONGOING
             text.contains("Completo", ignoreCase = true) -> SAnime.COMPLETED
             text.contains("Cancelado", ignoreCase = true) -> SAnime.CANCELLED
             else -> SAnime.UNKNOWN
@@ -96,9 +99,9 @@ class MeusAnimesBlog : AnimeHttpSource() {
     }
 
     private fun extractEpNum(href: String, text: String): String {
-        val regex = Regex("""[\d]+(?:\.[\d]+)?""")
+        val regex = Regex("""\d+(?:\.\d+)?""")
         val fromHref = regex.find(href.substringAfterLast("-"))?.value
-        val epText = text.substringAfter("Epis\u00f3dio").substringAfter("Episodio")
+        val epText = text.substringAfter("Episodio").substringAfter("Episodio")
         val fromText = regex.find(epText)?.value
         return fromText ?: fromHref ?: "1"
     }

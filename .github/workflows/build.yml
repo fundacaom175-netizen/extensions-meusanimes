@@ -48,6 +48,8 @@ jobs:
 
       - name: Build APK
         working-directory: build-system
+        env:
+          CI: "false"
         run: ./gradlew -p src pt:meusanimes:assembleDebug
 
       - name: Copy APK to repo
