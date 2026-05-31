@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "eu.kanade.tachiyomi.anime.br.meusanimes"
+    namespace = "eu.kanade.tachiyomi.animeextension.br.meusanimes"
     compileSdk = 34
 
     defaultConfig {

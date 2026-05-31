@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.anime.br.meusanimes
+package eu.kanade.tachiyomi.animeextension.br.meusanimes
 
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.animesource.model.SEpisode
