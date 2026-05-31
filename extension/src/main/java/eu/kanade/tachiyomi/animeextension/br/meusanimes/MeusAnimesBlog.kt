@@ -131,10 +131,21 @@ class MeusAnimesBlog : AnimeHttpSource() {
             val (tmdb, season, ep) = hashMatch.destructured
             val direct = resolveEpisodeVideo(tmdb, season, ep)
             if (direct.isNotEmpty()) {
-                return listOf(Hoster(
-                    hosterName = "MeusAnimes",
-                    videoList = direct
-                ))
+                return listOf(
+                    Hoster(
+                        hosterName = "MeusAnimes",
+                        videoList = direct,
+                    ),
+                )
+            }
+
+            return listOf(
+                Hoster(
+                    hosterUrl = src,
+                    hosterName = "Servidor 1",
+                    lazy = true,
+                ),
+            )
             }
         }
 
