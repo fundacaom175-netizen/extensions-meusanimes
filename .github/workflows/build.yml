@@ -65,32 +65,26 @@ jobs:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
         run: |
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>../gradle-crash.log || {
-            EXIT_CODE=$?
-            cat ../gradle-crash.log
-            exit $EXIT_CODE
-          }
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tee ../gradle-build.log
+          exit ${PIPESTATUS[0]}
 
       - name: Capture error log on failure
         if: failure()
         run: |
           mkdir -p repo
-          # Capture gradle crash log
-          if [ -f gradle-crash.log ]; then
-            cp gradle-crash.log repo/gradle-error.log
+          # Copy full gradle log (will overwrite if exists)
+          if [ -f gradle-build.log ]; then
+            cp gradle-build.log repo/gradle-error.log
           fi
-          # Try to get kotlin compile errors from .gradle
-          find build-system -name "*.log" 2>/dev/null | head -10 | while read f; do
+          # Append kotlin compile errors from .gradle if found
+          find build-system -name "*.log" -path "*kotlin*" 2>/dev/null | head -5 | while read f; do
             echo "=== $f ===" >> repo/gradle-error.log
             head -100 "$f" >> repo/gradle-error.log 2>/dev/null
           done
-          # Try reports
-          find build-system -path "*/reports/*" -name "*.html" 2>/dev/null | head -3 | while read f; do
-            echo "=== $f ===" >> repo/gradle-error.log
-          done
-          # If still nothing, log build tree
+          # If still empty, list dirs
           if [ ! -s repo/gradle-error.log ]; then
-            echo "No error log files found" > repo/gradle-error.log
+            echo "No error log files found - build tree:" > repo/gradle-error.log
+            ls -la build-system/ >> repo/gradle-error.log 2>/dev/null
           fi
 
       - name: Push debug error log
