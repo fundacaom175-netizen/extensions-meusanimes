@@ -34,20 +34,9 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" || true
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" || true
 
-      - name: Upgrade Kotlin, AGP, compileSdk, JDK target, and extensions-lib for Hoster API support
+      - name: Upgrade only extensions-lib to v16 for Hoster API support
         run: |
-          sed -i 's/kotlin_version = "2.0.20"/kotlin_version = "2.2.0"/' build-system/gradle/libs.versions.toml
-          sed -i 's/agp_version = "8.7.2"/agp_version = "8.12.0"/' build-system/gradle/libs.versions.toml
-          sed -i 's/gradle-8\.[0-9.]\+-bin/gradle-8.13-bin/' build-system/gradle/wrapper/gradle-wrapper.properties
-          sed -i 's/serialization_version = "1.7.3"/serialization_version = "1.9.0"/' build-system/gradle/libs.versions.toml
           sed -i 's/version = "14"/version = "v16"/' build-system/gradle/libs.versions.toml
-          sed -i 's/compileSdk = 32/compileSdk = 36/' build-system/buildSrc/src/main/kotlin/AndroidConfig.kt
-          sed -i 's/targetSdk = 32/targetSdk = 34/' build-system/buildSrc/src/main/kotlin/AndroidConfig.kt
-          # Upgrade JVM target from 1.8 to 17 (Kotlin 2.2.0 drops 1.8 support)
-          sed -i 's/VERSION_1_8/VERSION_17/g' build-system/common.gradle
-          sed -i 's/VERSION_1_8/VERSION_17/g' build-system/build.gradle.kts
-          # Remove Kotlin dependencies from buildSrc (kotlin-dsl provides its own Kotlin)
-          sed -i '/libs\.gradle\.kotlin/d' build-system/buildSrc/build.gradle.kts
 
       - name: Copy extension source to build system
         run: |
