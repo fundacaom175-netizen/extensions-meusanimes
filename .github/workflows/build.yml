@@ -58,9 +58,10 @@ jobs:
 
       - name: Copy APK to repo
         run: |
+          rm -f repo/apk/*.apk
           mkdir -p repo/apk repo/icon
           find build-system -name "*.apk" -type f
-          cp build-system/src/pt/meusanimes/build/outputs/apk/debug/*.apk repo/apk/aniyomi-pt.meusanimes-v1.0.0.apk
+          cp build-system/src/pt/meusanimes/build/outputs/apk/debug/*.apk repo/apk/aniyomi-pt.meusanimes-v14.1.apk
 
       - name: Commit and push APK
         run: |
