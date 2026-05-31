@@ -112,7 +112,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
                         val source = rawVideo.getJSONObject(i)
                         val url = source.getString("file")
                         val label = source.optString("label", "Servidor ${i + 1}")
-                        Video(url = url, quality = label)
+                        Video(url = url, quality = label, videoUrl = url)
                     }
                 }
             }
@@ -132,7 +132,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
             if (direct.isNotEmpty()) return direct
         }
 
-        return listOf(Video(url = src, quality = "Servidor 1"))
+        return listOf(Video(url = src, quality = "Servidor 1", videoUrl = src))
     }
 
     override fun videoUrlParse(response: Response): String {
