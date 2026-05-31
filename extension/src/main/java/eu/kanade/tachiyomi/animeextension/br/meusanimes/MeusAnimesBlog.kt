@@ -29,7 +29,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
                 thumbnail_url = el.select("img").attr("src")
             }
         }
-        val hasNext = doc.select("a.next").any()
+        val hasNext = doc.select("a.arrow_pag").any()
         return AnimesPage(animes, hasNext)
     }
 
@@ -37,7 +37,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
         return GET("$baseUrl/page/$page/?s=$query")
     }
 
-    override fun latestUpdatesRequest(page: Int) = GET("$baseUrl/lancamento/page/$page/")
+    override fun latestUpdatesRequest(page: Int) = GET("$baseUrl/g/em-lancamento/page/$page/")
 
     override fun latestUpdatesParse(response: Response): AnimesPage {
         val doc = response.asJsoup()
@@ -48,22 +48,23 @@ class MeusAnimesBlog : AnimeHttpSource() {
                 thumbnail_url = el.select("img").attr("src")
             }
         }
-        val hasNext = doc.select("a.next").any()
+        val hasNext = doc.select("a.arrow_pag").any()
         return AnimesPage(animes, hasNext)
     }
 
     override fun searchAnimeParse(response: Response): AnimesPage {
         val doc = response.asJsoup()
-        val animes = doc.select("article.item.tvshows").mapNotNull { el ->
-            val link = el.select("h3 a")
-            if (link.text().isBlank()) return@mapNotNull null
+        val animes = doc.select("div.result-item").mapNotNull { el ->
+            val link = el.select("div.title a").first() ?: return@mapNotNull null
+            val href = link.attr("href")
+            if (href.isBlank()) return@mapNotNull null
             SAnime.create().apply {
                 title = link.text()
-                setUrlWithoutDomain(link.attr("href"))
+                setUrlWithoutDomain(href)
                 thumbnail_url = el.select("img").attr("src")
             }
         }
-        val hasNext = doc.select("a.next").any()
+        val hasNext = doc.select("a.arrow_pag").any()
         return AnimesPage(animes, hasNext)
     }
 
@@ -81,27 +82,26 @@ class MeusAnimesBlog : AnimeHttpSource() {
 
     override fun episodeListParse(response: Response): List<SEpisode> {
         val doc = response.asJsoup()
-        return doc.select("#seasons article, .episodios li, li[class^=mark-]")
-            .mapNotNull { el ->
-                val link = el.select("a").first() ?: return@mapNotNull null
-                val href = link.attr("href")
-                if (href.isBlank()) return@mapNotNull null
-                val epNum = extractEpNum(href, link.text())
-                SEpisode.create().apply {
-                    setUrlWithoutDomain(href)
-                    name = link.text().ifBlank { "Episodio $epNum" }
-                    episode_number = epNum.toFloat()
-                    date_upload = 0L
-                }
+        return doc.select("#seasons .epi-item").mapNotNull { el ->
+            val link = el.select("a").first() ?: return@mapNotNull null
+            val href = link.attr("href")
+            if (href.isBlank()) return@mapNotNull null
+            val epNum = extractEpNum(el)
+            SEpisode.create().apply {
+                setUrlWithoutDomain(href)
+                name = el.select(".epi-title").text().ifBlank { "Episodio $epNum" }
+                episode_number = epNum.toFloat()
+                date_upload = 0L
             }
+        }
             .sortedByDescending { it.episode_number }
     }
 
     override fun videoListParse(response: Response): List<Video> {
         val doc = response.asJsoup()
-        val iframe = doc.select("iframe").first() ?: return emptyList()
+        val iframe = doc.select("#playex iframe").first() ?: return emptyList()
         val src = iframe.attr("src")
-        val quality = doc.select(".qualidade, .quality").text().ifBlank { "HD" }
+        val quality = doc.select(".qualidade").text().ifBlank { "HD" }
         return listOf(Video(src, "Servidor 1 ($quality)", src))
     }
 
@@ -118,11 +118,10 @@ class MeusAnimesBlog : AnimeHttpSource() {
         }
     }
 
-    private fun extractEpNum(href: String, text: String): String {
+    private fun extractEpNum(el: org.jsoup.nodes.Element): String {
+        val epiNum = el.select(".epi-num").text()
         val regex = Regex("""\d+(?:\.\d+)?""")
-        val fromHref = regex.find(href.substringAfterLast("-"))?.value
-        val epText = text.substringAfter("Episodio").substringAfter("Episodio")
-        val fromText = regex.find(epText)?.value
-        return fromText ?: fromHref ?: "1"
+        val afterDash = epiNum.substringAfter(" - ").trim()
+        return regex.find(afterDash)?.value ?: "1"
     }
 }
