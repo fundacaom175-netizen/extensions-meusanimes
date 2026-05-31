@@ -27,7 +27,7 @@ android {
 
 dependencies {
     // Aniyomi extension API
-    compileOnly("com.github.aniyomiorg:extensions-lib:17")
+    compileOnly("com.github.aniyomiorg:extensions-lib:16-rc4")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     compileOnly("org.jsoup:jsoup:1.17.2")
     compileOnly("io.reactivex:rxjava:1.3.8")

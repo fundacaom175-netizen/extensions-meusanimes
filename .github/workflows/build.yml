@@ -29,8 +29,8 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Upgrade extensions-lib from 14 to 17 for Hoster API support
-        run: sed -i 's/version = "14"/version = "17"/' build-system/gradle/libs.versions.toml
+      - name: Upgrade extensions-lib to 16-rc4 for Hoster API support
+        run: sed -i 's/version = "14"/version = "16-rc4"/' build-system/gradle/libs.versions.toml
 
       - name: Copy extension source to build system
         run: |
