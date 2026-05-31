@@ -57,7 +57,18 @@ jobs:
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        run: ./gradlew -p src pt:meusanimes:assembleDebug
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew -p src pt:meusanimes:assembleDebug --continue 2>&1 | tee build.log
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo "=== BUILD FAILED (exit code $rc) ==="
+            grep -E "^e:|^w:|error:|Error|FAILED|Exception|[.kt]:" build.log | head -80
+            echo "=== TAIL ==="
+            tail -30 build.log
+            exit $rc
+          fi
 
       - name: Copy APK to repo
         run: |
