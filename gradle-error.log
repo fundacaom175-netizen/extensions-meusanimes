@@ -1,3 +1,108 @@
+Downloading https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+.............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+
+Welcome to Gradle 8.11.1!
+
+Here are the highlights of this release:
+ - Parallel load and store for Configuration Cache
+ - Java compilation errors at the end of the build output
+ - Consolidated report for warnings and deprecations
+
+For more details see https://docs.gradle.org/8.11.1/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:generateExternalPluginSpecBuilders
+> Task :buildSrc:extractPrecompiledScriptPluginPlugins
+> Task :buildSrc:compilePluginsBlocks
+> Task :buildSrc:generatePrecompiledScriptPluginAccessors
+> Task :buildSrc:generateScriptPluginAdapters
+> Task :buildSrc:pluginDescriptors
+> Task :buildSrc:processResources
+> Task :buildSrc:compileKotlin
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:classes
+> Task :buildSrc:jar
+
+> Configure project :
+w: file:///home/runner/work/extensions-meusanimes/extensions-meusanimes/build-system/build.gradle.kts:17:9: 'kotlinOptions(KotlinJvmOptionsDeprecated /* = KotlinJvmOptions */.() -> Unit): Unit' is deprecated. Please migrate to the compilerOptions DSL. More details are here: https://kotl.in/u1r8ln
+Checking the license for package Android SDK Platform 32 in /usr/local/lib/android/sdk/licenses
+License for package Android SDK Platform 32 accepted.
+Preparing "Install Android SDK Platform 32 (revision 1)".
+"Install Android SDK Platform 32 (revision 1)" ready.
+Installing Android SDK Platform 32 in /usr/local/lib/android/sdk/platforms/android-32
+"Install Android SDK Platform 32 (revision 1)" complete.
+"Install Android SDK Platform 32 (revision 1)" finished.
+
+> Task :core:preBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :core:generateDebugResValues
+> Task :core:generateDebugResources
+> Task :core:packageDebugResources
+> Task :src:pt:meusanimes:lintKotlinAndroidTest NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinAndroidTestDebug NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinAndroidTestRelease NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinDebug NO-SOURCE
+> Task :core:javaPreCompileDebug
+> Task :core:parseDebugLocalResources
+> Task :core:extractDeepLinksDebug
+> Task :core:writeDebugAarMetadata
+> Task :core:generateDebugRFile
+> Task :core:compileDebugLibraryResources
+> Task :core:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:bundleLibCompileToJarDebug
+> Task :core:mergeDebugShaders
+> Task :core:compileDebugShaders NO-SOURCE
+> Task :core:generateDebugAssets UP-TO-DATE
+> Task :core:packageDebugAssets
+> Task :core:processDebugJavaRes NO-SOURCE
+> Task :core:bundleLibRuntimeToJarDebug
+> Task :core:mergeDebugJniLibFolders
+> Task :core:mergeDebugNativeLibs NO-SOURCE
+> Task :core:processDebugManifest
+> Task :core:copyDebugJniLibsProjectOnly
+> Task :src:pt:meusanimes:lintKotlinMain
+> Task :src:pt:meusanimes:lintKotlinRelease NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinTest NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinTestDebug NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinTestFixtures NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinTestFixturesDebug NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinTestFixturesRelease NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinTestRelease NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlin
+> Task :src:pt:meusanimes:writeManifestFile
+> Task :src:pt:meusanimes:preBuild
+> Task :src:pt:meusanimes:preDebugBuild
+> Task :src:pt:meusanimes:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :src:pt:meusanimes:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :src:pt:meusanimes:generateDebugBuildConfig
+> Task :src:pt:meusanimes:checkDebugAarMetadata
+> Task :src:pt:meusanimes:mapDebugSourceSetPaths
+> Task :src:pt:meusanimes:generateDebugResources
+> Task :src:pt:meusanimes:mergeDebugResources
+> Task :src:pt:meusanimes:createDebugCompatibleScreenManifests
+> Task :src:pt:meusanimes:extractDeepLinksDebug
+> Task :src:pt:meusanimes:processDebugMainManifest
+> Task :src:pt:meusanimes:processDebugManifest
+> Task :src:pt:meusanimes:javaPreCompileDebug FROM-CACHE
+> Task :src:pt:meusanimes:generateDebugAssets UP-TO-DATE
+> Task :src:pt:meusanimes:mergeDebugAssets
+> Task :src:pt:meusanimes:compressDebugAssets
+> Task :src:pt:meusanimes:checkDebugDuplicateClasses
+> Task :src:pt:meusanimes:desugarDebugFileDependencies
+> Task :src:pt:meusanimes:processDebugManifestForPackage
+> Task :src:pt:meusanimes:mergeExtDexDebug
+> Task :src:pt:meusanimes:mergeLibDexDebug
+> Task :src:pt:meusanimes:mergeDebugJniLibFolders
+> Task :src:pt:meusanimes:mergeDebugNativeLibs NO-SOURCE
+> Task :src:pt:meusanimes:stripDebugDebugSymbols NO-SOURCE
+> Task :src:pt:meusanimes:processDebugResources
+> Task :src:pt:meusanimes:validateSigningDebug
+> Task :src:pt:meusanimes:writeDebugAppMetadata
+> Task :src:pt:meusanimes:writeDebugSigningConfigVersions
+
+> Task :src:pt:meusanimes:compileDebugKotlin FAILED
 e: file:///home/runner/work/extensions-meusanimes/extensions-meusanimes/build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/MeusAnimesBlog.kt:115:42 No value passed for parameter 'videoUrl'.
 e: file:///home/runner/work/extensions-meusanimes/extensions-meusanimes/build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/MeusAnimesBlog.kt:135:40 No value passed for parameter 'videoUrl'.
 
@@ -208,4 +313,5 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 	... 2 more
 
 
-BUILD FAILED in 2m 22s
+BUILD FAILED in 2m 19s
+50 actionable tasks: 49 executed, 1 from cache
