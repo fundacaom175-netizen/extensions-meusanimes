@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.animeextension.br.meusanimes
 
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 import eu.kanade.tachiyomi.animesource.model.AnimesPage
-import eu.kanade.tachiyomi.animesource.model.Hoster
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.animesource.model.SEpisode
 import eu.kanade.tachiyomi.animesource.model.Video
@@ -113,7 +112,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
                         val source = rawVideo.getJSONObject(i)
                         val url = source.getString("file")
                         val label = source.optString("label", "Servidor ${i + 1}")
-                        Video(videoUrl = url, videoTitle = label)
+                        Video(url = url, quality = label)
                     }
                 }
             }
@@ -121,7 +120,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
         return emptyList()
     }
 
-    override suspend fun getHosterList(episode: SEpisode): List<Hoster> {
+    override suspend fun fetchVideoList(episode: SEpisode): List<Video> {
         val doc = client.newCall(GET("$baseUrl${episode.url}")).execute().asJsoup()
         val iframe = doc.select("#playex iframe").first() ?: return emptyList()
         val src = iframe.attr("src")
@@ -130,41 +129,11 @@ class MeusAnimesBlog : AnimeHttpSource() {
         if (hashMatch != null) {
             val (tmdb, season, ep) = hashMatch.destructured
             val direct = resolveEpisodeVideo(tmdb, season, ep)
-            if (direct.isNotEmpty()) {
-                return listOf(
-                    Hoster(
-                        hosterName = "MeusAnimes",
-                        videoList = direct,
-                    ),
-                )
-            }
-
-            return listOf(
-                Hoster(
-                    hosterUrl = src,
-                    hosterName = "Servidor 1",
-                    lazy = true,
-                ),
-            )
+            if (direct.isNotEmpty()) return direct
         }
 
-        return listOf(
-            Hoster(
-                hosterUrl = src,
-                hosterName = "Servidor 1",
-                lazy = true,
-            ),
-        )
+        return listOf(Video(url = src, quality = "Servidor 1"))
     }
-
-    override suspend fun getVideoList(hoster: Hoster): List<Video> {
-        hoster.videoList?.let { return it }
-        return emptyList()
-    }
-
-    override fun seasonListParse(response: Response): List<SAnime> = emptyList()
-
-    override fun hosterListParse(response: Response): List<Hoster> = emptyList()
 
     override fun videoUrlParse(response: Response): String {
         return response.request.url.toString()

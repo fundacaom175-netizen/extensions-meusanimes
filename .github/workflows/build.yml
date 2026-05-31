@@ -29,15 +29,6 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install additional SDK platforms
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" || true
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" || true
-
-      - name: Upgrade only extensions-lib to v16 for Hoster API support
-        run: |
-          sed -i 's/version = "14"/version = "v16"/' build-system/gradle/libs.versions.toml
-
       - name: Copy extension source to build system
         run: |
           rm -rf build-system/src/*
@@ -51,9 +42,6 @@ jobs:
               extVersionCode = 1
           }
           apply from: "$rootDir/common.gradle"
-          tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-              kotlinOptions.freeCompilerArgs += "-Xskip-metadata-version-check"
-          }
           GRADLE
 
       - name: Fix package references in source
@@ -66,27 +54,7 @@ jobs:
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
-        continue-on-error: true
-        run: |
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace -x lintKotlin > /tmp/gradle.log 2>&1 || true
-
-      - name: Commit error log to debug branch if build failed
-        if: always()
-        run: |
-          apk=$(find build-system -name "*.apk" -type f | head -1)
-          if [ -z "$apk" ]; then
-            echo "Build failed. Committing error log to debug-gradle-log branch..."
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git checkout --orphan debug-gradle-log
-            git rm -rf .
-            cp /tmp/gradle.log gradle-error.log
-            git add gradle-error.log
-            git commit -m "debug: gradle error log"
-            git push origin debug-gradle-log --force
-          else
-            echo "APK found: $apk - build succeeded"
-          fi
+        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace
 
       - name: Copy APK to repo
         run: |
