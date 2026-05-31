@@ -120,7 +120,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
         return emptyList()
     }
 
-    override suspend fun fetchVideoList(episode: SEpisode): List<Video> {
+    override suspend fun getVideoList(episode: SEpisode): List<Video> {
         val doc = client.newCall(GET("$baseUrl${episode.url}")).execute().asJsoup()
         val iframe = doc.select("#playex iframe").first() ?: return emptyList()
         val src = iframe.attr("src")
