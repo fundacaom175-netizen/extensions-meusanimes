@@ -51,8 +51,7 @@ jobs:
               extVersionCode = 1
           }
           apply from: "$rootDir/common.gradle"
-          tasks.matching { it.name.startsWith('lintKotlin') }.configureEach { enabled = false }
-          tasks.named('preBuild').configure { dependsOn.clear() }
+
           GRADLE
 
       - name: Fix package references in source
@@ -67,7 +66,7 @@ jobs:
           CI_CHUNK_NUM: "0"
         continue-on-error: true
         run: |
-          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace > /tmp/gradle.log 2>&1 || true
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace -x lintKotlin > /tmp/gradle.log 2>&1 || true
 
       - name: Commit error log to debug branch if build failed
         if: always()
