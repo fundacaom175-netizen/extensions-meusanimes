@@ -76,11 +76,23 @@ jobs:
         run: |
           ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace > /tmp/gradle.log 2>&1 || true
 
-      - name: Upload Gradle log
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-log
-          path: /tmp/gradle.log
+      - name: Commit error log to debug branch if build failed
+        if: always()
+        run: |
+          apk=$(find build-system -name "*.apk" -type f | head -1)
+          if [ -z "$apk" ]; then
+            echo "Build failed. Committing error log to debug-gradle-log branch..."
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git checkout --orphan debug-gradle-log
+            git rm -rf .
+            cp /tmp/gradle.log gradle-error.log
+            git add gradle-error.log
+            git commit -m "debug: gradle error log"
+            git push origin debug-gradle-log --force
+          else
+            echo "APK found: $apk - build succeeded"
+          fi
 
       - name: Copy APK to repo
         run: |
