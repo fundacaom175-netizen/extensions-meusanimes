@@ -149,11 +149,13 @@ class MeusAnimesBlog : AnimeHttpSource() {
             }
         }
 
-        return listOf(Hoster(
-            hosterUrl = src,
-            hosterName = "Servidor 1",
-            lazy = true
-        ))
+        return listOf(
+            Hoster(
+                hosterUrl = src,
+                hosterName = "Servidor 1",
+                lazy = true,
+            ),
+        )
     }
 
     override suspend fun getVideoList(hoster: Hoster): List<Video> {
