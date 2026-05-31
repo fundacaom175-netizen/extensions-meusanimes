@@ -49,6 +49,16 @@ jobs:
           sed -i 's/package eu.kanade.tachiyomi.animeextension.br.meusanimes/package eu.kanade.tachiyomi.animeextension.pt.meusanimes/g' \
             build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/*.kt
 
+      - name: Add skip metadata version check
+        run: |
+          sed -i '/freeCompilerArgs += /a\        freeCompilerArgs += "-Xskip-metadata-version-check"' build-system/common.gradle
+
+      - name: Force extensions-lib version to 14
+        run: |
+          cat >> build-system/gradle.properties << 'EOF'
+          aniYomiLibVersion=14
+          EOF
+
       - name: Build APK
         working-directory: build-system
         env:
