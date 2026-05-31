@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.animeextension.br.meusanimes
 
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
+import eu.kanade.tachiyomi.animesource.model.AnimesPage
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.animesource.model.SEpisode
 import eu.kanade.tachiyomi.animesource.model.Video
@@ -9,7 +10,6 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.Request
 import okhttp3.Response
-import org.jsoup.nodes.Document
 
 class MeusAnimesBlog : AnimeHttpSource() {
 
@@ -20,24 +20,26 @@ class MeusAnimesBlog : AnimeHttpSource() {
 
     override fun popularAnimeRequest(page: Int) = GET("$baseUrl/a/page/$page/")
 
-    override fun popularAnimeParse(response: Response): List<SAnime> {
+    override fun popularAnimeParse(response: Response): AnimesPage {
         val doc = response.asJsoup()
-        return doc.select("article.item.tvshows").map { el ->
+        val animes = doc.select("article.item.tvshows").map { el ->
             SAnime.create().apply {
                 title = el.select("h3 a").text()
                 setUrlWithoutDomain(el.select("h3 a").attr("href"))
                 thumbnail_url = el.select("img").attr("src")
             }
         }
+        val hasNext = doc.select("a.next").any()
+        return AnimesPage(animes, hasNext)
     }
 
     override fun searchAnimeRequest(page: Int, query: String, filters: AnimeFilterList): Request {
         return GET("$baseUrl/page/$page/?s=$query")
     }
 
-    override fun searchAnimeParse(response: Response): List<SAnime> {
+    override fun searchAnimeParse(response: Response): AnimesPage {
         val doc = response.asJsoup()
-        return doc.select("article.item.tvshows").mapNotNull { el ->
+        val animes = doc.select("article.item.tvshows").mapNotNull { el ->
             val link = el.select("h3 a")
             if (link.text().isBlank()) return@mapNotNull null
             SAnime.create().apply {
@@ -46,16 +48,19 @@ class MeusAnimesBlog : AnimeHttpSource() {
                 thumbnail_url = el.select("img").attr("src")
             }
         }
+        val hasNext = doc.select("a.next").any()
+        return AnimesPage(animes, hasNext)
     }
 
-    override fun animeDetailsParse(document: Document): SAnime {
+    override fun animeDetailsParse(response: Response): SAnime {
+        val doc = response.asJsoup()
         return SAnime.create().apply {
-            title = document.select("h1").text()
-                .ifBlank { document.select("title").text().replace(" - Meus Animes", "").trim() }
-            thumbnail_url = document.select("meta[property=og:image]").attr("content")
-            description = document.select("meta[property=og:description]").attr("content")
-            genre = document.select(".generos a").joinToString { it.text() }
-            status = parseStatus(document.text())
+            title = doc.select("h1").text()
+                .ifBlank { doc.select("title").text().replace(" - Meus Animes", "").trim() }
+            thumbnail_url = doc.select("meta[property=og:image]").attr("content")
+            description = doc.select("meta[property=og:description]").attr("content")
+            genre = doc.select(".generos a").joinToString { it.text() }
+            status = parseStatus(doc.text())
         }
     }
 
@@ -71,7 +76,7 @@ class MeusAnimesBlog : AnimeHttpSource() {
                     setUrlWithoutDomain(href)
                     name = link.text().ifBlank { "Episodio $epNum" }
                     episode_number = epNum.toFloat()
-                    date_upload = el.select(".date, span.date").text()
+                    date_upload = 0L
                 }
             }
             .sortedByDescending { it.episode_number }
