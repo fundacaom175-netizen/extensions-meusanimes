@@ -52,27 +52,25 @@ jobs:
           sed -i 's/package eu.kanade.tachiyomi.animeextension.br.meusanimes/package eu.kanade.tachiyomi.animeextension.pt.meusanimes/g' \
             build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/*.kt
 
-      - name: List projects
+      - name: Build APK (save logs)
         working-directory: build-system
         env:
           CI_CHUNK_SIZE: "100"
           CI_CHUNK_NUM: "0"
         continue-on-error: true
-        run: ./gradlew -p src projects --info 2>&1
+        run: |
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug --continue --stacktrace 2>&1 > gradle.log
+          echo "EXIT_CODE=$?" >> $GITHUB_ENV
 
-      - name: Build APK
-        working-directory: build-system
-        env:
-          CI_CHUNK_SIZE: "100"
-          CI_CHUNK_NUM: "0"
-        continue-on-error: true
-        run: ./gradlew -p src assembleDebug --continue 2>&1 | tee build.log
-
-      - name: Show build errors
+      - name: Show tail of build log
         if: always()
         working-directory: build-system
-        run: |
-          grep -n -i "error\|exception\|FAILED\|unresolved reference\|does not override\|\.kt:" build.log | head -50 || echo "No errors found"
+        run: tail -200 gradle.log
+
+      - name: Show compilation errors
+        if: always()
+        working-directory: build-system
+        run: grep -n "^e:" gradle.log | head -50 || echo "No Kotlin compile errors"
 
       - name: Copy APK to repo
         run: |
