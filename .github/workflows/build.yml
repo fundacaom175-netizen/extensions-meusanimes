@@ -62,11 +62,12 @@ jobs:
           set -o pipefail
           ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace 2>&1 | tee gradle.log
           rc=$?
-          echo "=== GRADLE EXIT CODE: $rc ==="
           if [ $rc -ne 0 ]; then
-            echo "=== COMPILATION ERRORS ==="
-            grep -n "^e:" gradle.log | head -50
-            tail -50 gradle.log
+            echo "::error::GRADLE EXIT CODE $rc"
+            grep -n "^e:" gradle.log | head -5 | while read line; do echo "::error::$line"; done
+            echo "::group::Full Gradle log tail"
+            tail -100 gradle.log
+            echo "::endgroup::"
           fi
           exit $rc
 
