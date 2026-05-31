@@ -29,6 +29,7 @@ jobs:
 
       - name: Copy extension source to build system
         run: |
+          rm -rf build-system/src/*
           mkdir -p build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes
           cp -r extension/src/main/java/eu/kanade/tachiyomi/animeextension/br/meusanimes/* build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/
           cp extension/src/main/AndroidManifest.xml build-system/src/pt/meusanimes/
@@ -49,7 +50,8 @@ jobs:
       - name: Build APK
         working-directory: build-system
         env:
-          CI: "false"
+          CI_CHUNK_SIZE: "100"
+          CI_CHUNK_NUM: "0"
         run: ./gradlew -p src pt:meusanimes:assembleDebug
 
       - name: Copy APK to repo
