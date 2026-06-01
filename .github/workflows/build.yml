@@ -97,12 +97,13 @@ jobs:
           echo "$RESULTS"
           echo "============================="
 
-      - name: Upload MeusAnimes build log artifact
+      - name: Save MeusAnimes build log to repo
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: meusanimes-build-log
-          path: /tmp/meusanimes_build.log
+        run: |
+          if [ -f /tmp/meusanimes_build.log ]; then
+            mkdir -p repo/logs
+            cp /tmp/meusanimes_build.log repo/logs/meusanimes-latest.txt
+          fi
 
       - name: Inspect build outputs
         run: |
@@ -162,6 +163,8 @@ jobs:
           git fetch origin main
           git reset --soft origin/main
           git add repo/
+          # A text file showing the latest output is always available at:
+          # https://raw.githubusercontent.com/fundacaom175-netizen/extensions-meusanimes/main/repo/logs/meusanimes-latest.txt
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
