@@ -71,35 +71,30 @@ jobs:
       - name: Build all APKs
         working-directory: build-system
         run: |
-          set +e
-          RESULTS=""
-          for ext in meusanimes anitube hinatasoul betteranime rinecloud animesdigital animefire; do
-            echo "=== Building $ext ==="
-            ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1
-            if [ $? -eq 0 ]; then
-              echo "=== SUCCESS: $ext ==="
-              RESULTS="$RESULTS ✅ $ext"
-            else
-              echo "=== FAILED: $ext ==="
-              RESULTS="$RESULTS ❌ $ext"
-            fi
-          done
-          echo "========== RESULTS =========="
-          echo "$RESULTS"
-          echo "============================="
+          echo "=== Building all extensions ==="
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug :src:pt:anitube:assembleDebug :src:pt:hinatasoul:assembleDebug :src:pt:betteranime:assembleDebug :src:pt:rinecloud:assembleDebug :src:pt:animesdigital:assembleDebug :src:pt:animefire:assembleDebug --stacktrace 2>&1
+          status=$?
+          if [ $status -eq 0 ]; then
+            echo "=== ALL EXTENSIONS BUILT SUCCESSFULLY ==="
+          else
+            echo "=== BUILD FAILED WITH EXIT CODE $status ==="
+          fi
+          echo "=== Build output locations ==="
+          find . -name "*.apk" -type f 2>/dev/null
 
       - name: Copy APKs and icons to repo
         run: |
           rm -rf repo/apk repo/icon
           mkdir -p repo/apk repo/icon
-          for ext in meusanimes anitube hinatasoul betteranime rinecloud animesdigital animefire; do
-            apk_path=$(find build-system/src/pt/$ext -name "*.apk" -type f | head -1)
-            if [ -n "$apk_path" ]; then
-              base=$(basename "$apk_path")
-              clean_name=$(echo "$base" | sed 's/-debug//')
-              echo "OK: $ext -> repo/apk/$clean_name"
-              cp "$apk_path" "repo/apk/$clean_name"
-            fi
+          echo "=== Finding all APKs ==="
+          find build-system -name "*.apk" -type f 2>/dev/null
+          for apk_path in $(find build-system -name "*.apk" -type f 2>/dev/null); do
+            echo "Processing: $apk_path"
+            base=$(basename "$apk_path")
+            clean_name=$(echo "$base" | sed 's/-debug//')
+            dest="repo/apk/$clean_name"
+            echo "Copy: $apk_path -> $dest"
+            cp "$apk_path" "$dest"
           done
           for ext in anitube hinatasoul betteranime rinecloud animesdigital animefire; do
             icon_dir="repo/icon/$ext"
@@ -115,6 +110,8 @@ jobs:
           done
           echo "=== APKs in repo ==="
           ls -la repo/apk/
+          echo "=== Contents of repo/ ==="
+          find repo/ -type f
 
       - name: Commit and push APKs
         run: |
@@ -122,5 +119,14 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git add repo/
-          git diff --cached --quiet || git commit -m "chore: update APKs"
-          git push
+          echo "=== Staged changes ==="
+          git diff --cached --stat
+          git diff --cached --quiet
+          staged=$?
+          if [ $staged -eq 0 ]; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update APKs"
+            git push
+            echo "Committed and pushed."
+          fi
