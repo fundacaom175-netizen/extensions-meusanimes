@@ -119,8 +119,12 @@ class MeusAnimesBlog : AnimeHttpSource() {
                 } else {
                     resolveVideoUrl(rawVideo.toString())
                 }
-            } else emptyList()
-        } catch (_: Exception) { emptyList() }
+            } else {
+                emptyList()
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     private fun resolveVideoUrl(url: String, label: String = ""): List<Video> {

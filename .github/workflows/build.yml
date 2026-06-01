@@ -97,20 +97,7 @@ jobs:
           echo "$RESULTS"
           echo "============================="
 
-      - name: Save MeusAnimes build log to repo
-        if: always()
-        run: |
-          if [ -f /tmp/meusanimes_build.log ]; then
-            echo "=== BUILD LOG FILE EXISTS ==="
-            wc -l /tmp/meusanimes_build.log
-            cp /tmp/meusanimes_build.log meusanimes-build-log.txt
-            echo "=== BUILD LOG SAVED ==="
-          else
-            echo "=== BUILD LOG FILE NOT FOUND ==="
-            echo "no build log" > meusanimes-build-log.txt
-          fi
-
-      - name: Upload MeusAnimes build log as artifact
+      - name: Upload MeusAnimes build log artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -175,7 +162,6 @@ jobs:
           git fetch origin main
           git reset --soft origin/main
           git add repo/
-          git add meusanimes-build-log.txt --ignore-errors
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
