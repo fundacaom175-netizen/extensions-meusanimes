@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.util.asJsoup
+import okhttp3.Headers
 import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONArray
@@ -18,6 +19,9 @@ class MeusAnimesBlog : AnimeHttpSource() {
     override val name = "Meus Animes"
     override val baseUrl = "https://meusanimes.blog"
     override val lang = "pt-BR"
+
+    override fun headersBuilder() = super.headersBuilder()
+        .add("Referer", "$baseUrl/")
     override val supportsLatest = true
 
     override fun popularAnimeRequest(page: Int) = GET("$baseUrl/a/page/$page/")
@@ -149,13 +153,19 @@ class MeusAnimesBlog : AnimeHttpSource() {
         }
         if (finalUrl.contains("/embed/")) {
             return try {
-                val embedHtml = client.newCall(GET(finalUrl)).execute().body!!.string()
+                val embedHeaders = headers.newBuilder()
+                    .set("Referer", "https://serv01.meusdoramas.club/")
+                    .build()
+                val embedHtml = client.newCall(GET(finalUrl, embedHeaders)).execute().body!!.string()
                 val filePattern = Regex(""""file":\s*"([^"]+)"""")
                 val match = filePattern.find(embedHtml)
                 if (match != null) {
                     val videoUrl = match.groupValues[1].replace("\\/", "/")
                     val quality = label.ifBlank { "Servidor" }
-                    listOf(Video(videoUrl, quality, videoUrl))
+                    val videoHeaders = headers.newBuilder()
+                        .set("Referer", "https://video.meusdoramas.club/")
+                        .build()
+                    listOf(Video(videoUrl, quality, videoUrl, headers = videoHeaders))
                 } else emptyList()
             } catch (_: Exception) { emptyList() }
         }
