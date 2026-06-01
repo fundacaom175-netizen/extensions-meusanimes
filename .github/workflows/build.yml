@@ -95,21 +95,22 @@ jobs:
 
       - name: Inspect build outputs
         run: |
+          echo "=== MeusAnimes source files ==="
+          find build-system/src/pt/meusanimes/ -type f 2>/dev/null || echo "meusanimes dir not found"
           echo "=== build-system directory structure ==="
           find build-system -maxdepth 3 -type d 2>/dev/null | sort || true
           echo "=== Searching for .apk files ==="
           find build-system -name "*.apk" 2>/dev/null || true
           echo "=== build-system/src/pt/ listing ==="
           ls -la build-system/src/pt/ 2>/dev/null || true
-          for ext in meusanimes anitube hinatasoul betteranime rinecloud animesdigital animefire; do
+          echo "=== meusanimes build outputs ==="
+          find build-system/src/pt/meusanimes/build -type f 2>/dev/null | head -20 || echo "no meusanimes build dir"
+          for ext in anitube hinatasoul betteranime rinecloud animesdigital animefire; do
             echo "--- $ext build outputs ---"
-            find "build-system/src/pt/$ext" -name "*.apk" -o -name "*.aar" 2>/dev/null || true
-            find "build-system/src/pt/$ext/build" -maxdepth 4 -type d 2>/dev/null | head -5 || true
+            find "build-system/src/pt/$ext/build/outputs" -type f 2>/dev/null | head -5 || true
           done
-          echo "=== All build/ dirs with outputs ==="
-          find build-system -path "*/build/outputs" -type d 2>/dev/null || true
-          find build-system -path "*/build/outputs/apk" -type d 2>/dev/null || true
-          find build-system -path "*/build/outputs/apk/debug" -exec ls -la {} \; 2>/dev/null || true
+          echo "=== All apk locations ==="
+          find build-system -name "*.apk" -type f 2>/dev/null || true
 
       - name: Copy APKs and icons to repo
         run: |
@@ -147,19 +148,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git add -A
+          git fetch origin main
+          git reset --soft origin/main
+          git add repo/
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
             echo "=== Staged changes ==="
             git diff --cached --stat
-            git pull --rebase origin main 2>&1 || echo "(rebase done or not needed)"
-            git add -A
-            if git diff --cached --quiet; then
-              echo "No changes after rebase."
-            else
-              git commit -m "chore: update APKs [skip ci]"
-              git push --force-with-lease origin main
-              echo "Committed and pushed."
-            fi
+            git commit -m "chore: update APKs [skip ci]"
+            git push origin HEAD:main
+            echo "Committed and pushed."
           fi
