@@ -138,7 +138,8 @@ class MeusAnimesBlog : AnimeHttpSource() {
     override suspend fun getVideoList(episode: SEpisode): List<Video> {
         val doc = client.newCall(GET("$baseUrl${episode.url}")).execute().asJsoup()
         val iframe = doc.select("#playex iframe").first() ?: return emptyList()
-        val src = iframe.attr("src")
+        val src = iframe.attr("abs:src")
+        if (src.isBlank()) return emptyList()
 
         val hashMatch = Regex("#/video/(\\d+)/(\\d+)/(\\d+)/").find(src)
         if (hashMatch != null) {
@@ -147,7 +148,17 @@ class MeusAnimesBlog : AnimeHttpSource() {
             if (direct.isNotEmpty()) return direct
         }
 
-        return listOf(Video(url = src, quality = "Servidor 1", videoUrl = src))
+        return try {
+            val playerHtml = client.newCall(GET(src)).execute().body!!.string()
+            val urls = Regex("""file":\s*"([^"]+)""").findAll(playerHtml)
+                .map { it.groupValues[1] }
+                .distinct()
+                .map { Video(it, "Servidor", it) }
+                .toList()
+            if (urls.isNotEmpty()) urls else emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     override fun videoUrlParse(response: Response): String {
