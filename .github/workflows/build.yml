@@ -78,12 +78,14 @@ jobs:
           RESULTS=""
           for ext in meusanimes anitube hinatasoul betteranime rinecloud animesdigital animefire; do
             echo "=== Building $ext ==="
+            echo "--- Gradle output for $ext ---"
             ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1
-            if [ $? -eq 0 ]; then
+            exit_code=$?
+            if [ $exit_code -eq 0 ]; then
               echo "=== SUCCESS: $ext ==="
               RESULTS="$RESULTS $ext ✓"
             else
-              echo "=== FAILED: $ext ==="
+              echo "=== FAILED: $ext (exit code $exit_code) ==="
               RESULTS="$RESULTS $ext ✗"
             fi
           done
@@ -93,19 +95,21 @@ jobs:
 
       - name: Inspect build outputs
         run: |
-          echo "=== build-system directory structure (top 3 levels) ==="
-          find build-system -maxdepth 3 -type d 2>/dev/null | sort
-          echo "=== Searching for .apk files in build-system ==="
-          find build-system -name "*.apk" 2>/dev/null
-          echo "=== Searching for .aar files ==="
-          find build-system -name "*.aar" 2>/dev/null | head -20
-          echo "=== buildSystem/src/pt/ directories ==="
-          ls -la build-system/src/pt/
+          echo "=== build-system directory structure ==="
+          find build-system -maxdepth 3 -type d 2>/dev/null | sort || true
+          echo "=== Searching for .apk files ==="
+          find build-system -name "*.apk" 2>/dev/null || true
+          echo "=== build-system/src/pt/ listing ==="
+          ls -la build-system/src/pt/ 2>/dev/null || true
           for ext in meusanimes anitube hinatasoul betteranime rinecloud animesdigital animefire; do
-            echo "--- $ext build directory ---"
-            ls -la build-system/src/pt/$ext/ 2>/dev/null || echo "  (dir not found)"
-            find build-system/src/pt/$ext/build -maxdepth 5 -type d 2>/dev/null | head -10 || echo "  (build dir not found)"
+            echo "--- $ext build outputs ---"
+            find "build-system/src/pt/$ext" -name "*.apk" -o -name "*.aar" 2>/dev/null || true
+            find "build-system/src/pt/$ext/build" -maxdepth 4 -type d 2>/dev/null | head -5 || true
           done
+          echo "=== All build/ dirs with outputs ==="
+          find build-system -path "*/build/outputs" -type d 2>/dev/null || true
+          find build-system -path "*/build/outputs/apk" -type d 2>/dev/null || true
+          find build-system -path "*/build/outputs/apk/debug" -exec ls -la {} \; 2>/dev/null || true
 
       - name: Copy APKs and icons to repo
         run: |
