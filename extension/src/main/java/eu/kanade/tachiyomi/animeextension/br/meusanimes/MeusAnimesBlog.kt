@@ -153,20 +153,19 @@ class MeusAnimesBlog : AnimeHttpSource() {
         }
         if (finalUrl.contains("/embed/")) {
             return try {
-                val embedHeaders = headers.newBuilder()
-                    .set("Referer", "https://serv01.meusdoramas.club/")
-                    .build()
-                val embedHtml = client.newCall(GET(finalUrl, embedHeaders)).execute().body!!.string()
+                val embedHtml = client.newCall(GET(finalUrl)).execute().body!!.string()
                 val filePattern = Regex(""""file":\s*"([^"]+)"""")
                 val match = filePattern.find(embedHtml)
                 if (match != null) {
                     val videoUrl = match.groupValues[1].replace("\\/", "/")
                     val quality = label.ifBlank { "Servidor" }
-                    val videoHeaders = headers.newBuilder()
-                        .set("Referer", "https://video.meusdoramas.club/")
+                    val videoHeaders = Headers.Builder()
+                        .add("Referer", "https://video.meusdoramas.club/")
                         .build()
                     listOf(Video(videoUrl, quality, videoUrl, headers = videoHeaders))
-                } else emptyList()
+                } else {
+                    emptyList()
+                }
             } catch (_: Exception) { emptyList() }
         }
         return listOf(Video(url = finalUrl, quality = label.ifBlank { "Servidor 1" }, videoUrl = finalUrl))
