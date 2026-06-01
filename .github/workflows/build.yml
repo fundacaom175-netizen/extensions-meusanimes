@@ -78,9 +78,16 @@ jobs:
           RESULTS=""
           for ext in anitube hinatasoul betteranime rinecloud animesdigital animefire meusanimes; do
             echo "=== Building $ext ==="
-            echo "--- Gradle output for $ext ---"
-            ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1
-            exit_code=$?
+            if [ "$ext" = "meusanimes" ]; then
+              ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1 | tee /tmp/meusanimes_build.log
+              exit_code=${PIPESTATUS[0]}
+              echo "=== MEUSANIMES BUILD LOG START ==="
+              cat /tmp/meusanimes_build.log
+              echo "=== MEUSANIMES BUILD LOG END ==="
+            else
+              ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1
+              exit_code=$?
+            fi
             if [ $exit_code -eq 0 ]; then
               echo "=== SUCCESS: $ext ==="
               RESULTS="$RESULTS $ext ✓"
