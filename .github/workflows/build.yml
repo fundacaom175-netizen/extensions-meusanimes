@@ -143,15 +143,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git add repo/
-          echo "=== Staged changes ==="
-          git diff --cached --stat
-          git diff --cached --quiet
-          staged=$?
-          if [ $staged -eq 0 ]; then
+          git add -A
+          if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: update APKs"
-            git push
-            echo "Committed and pushed."
+            echo "=== Staged changes ==="
+            git diff --cached --stat
+            git pull --rebase origin main 2>&1 || echo "(rebase done or not needed)"
+            git add -A
+            if git diff --cached --quiet; then
+              echo "No changes after rebase."
+            else
+              git commit -m "chore: update APKs [skip ci]"
+              git push --force-with-lease origin main
+              echo "Committed and pushed."
+            fi
           fi
