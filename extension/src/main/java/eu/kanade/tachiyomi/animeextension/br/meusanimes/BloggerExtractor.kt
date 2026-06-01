@@ -8,7 +8,7 @@ import okhttp3.OkHttpClient
 class BloggerExtractor(private val client: OkHttpClient) {
     fun videosFromUrl(url: String, headers: Headers, suffix: String = ""): List<Video> {
         val html = client.newCall(GET(url, headers)).execute()
-            .body.string()
+            .body!!.string()
             .takeIf { !it.contains("errorContainer") }
             ?: return emptyList()
 
