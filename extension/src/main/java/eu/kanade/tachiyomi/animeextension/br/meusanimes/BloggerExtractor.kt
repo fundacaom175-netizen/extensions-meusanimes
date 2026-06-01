@@ -6,7 +6,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 
 class BloggerExtractor(private val client: OkHttpClient) {
-    fun videosFromUrl(url: String, headers: Headers, suffix: String = ""): List<Video> {
+    fun videosFromUrl(url: String, headers: Headers = Headers.EMPTY, suffix: String = ""): List<Video> {
         val html = client.newCall(GET(url, headers)).execute()
             .body!!.string()
             .takeIf { !it.contains("errorContainer") }
