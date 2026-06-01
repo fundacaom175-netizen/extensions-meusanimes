@@ -99,25 +99,36 @@ class MeusAnimesBlog : AnimeHttpSource() {
             .sortedByDescending { it.episode_number }
     }
 
+    private val bloggerExtractor by lazy { BloggerExtractor(client) }
+
     private fun resolveEpisodeVideo(tmdb: String, season: String, episode: String): List<Video> {
         val apiUrl = "https://serv01.meusdoramas.club/posts/get-video.php?tmdb=$tmdb&season_number=$season&episode_number=$episode"
-        try {
+        return try {
             val apiResponse = client.newCall(GET(apiUrl)).execute()
             val body = apiResponse.body!!.string()
             val json = JSONObject(body)
             if (json.optBoolean("success", false)) {
                 val rawVideo = json.get("videoUrl")
                 if (rawVideo is JSONArray) {
-                    return (0 until rawVideo.length()).map { i ->
-                        val source = rawVideo.getJSONObject(i)
-                        val url = source.getString("file")
-                        val label = source.optString("label", "Servidor ${i + 1}")
-                        Video(url = url, quality = label, videoUrl = url)
+                    (0 until rawVideo.length()).flatMap { i ->
+                        val obj = rawVideo.getJSONObject(i)
+                        val url = obj.getString("file")
+                        val label = obj.optString("label", "Servidor ${i + 1}")
+                        resolveVideoUrl(url, label)
                     }
+                } else {
+                    resolveVideoUrl(rawVideo.toString())
                 }
-            }
-        } catch (_: Exception) {}
-        return emptyList()
+            } else emptyList()
+        } catch (_: Exception) { emptyList() }
+    }
+
+    private fun resolveVideoUrl(url: String, label: String = ""): List<Video> {
+        if (url.contains("blogger") || url.contains("googleusercontent") || url.contains("blogspot")) {
+            val blogger = bloggerExtractor.videosFromUrl(url)
+            if (blogger.isNotEmpty()) return blogger
+        }
+        return listOf(Video(url = url, quality = label.ifBlank { "Servidor 1" }, videoUrl = url))
     }
 
     override suspend fun getVideoList(episode: SEpisode): List<Video> {

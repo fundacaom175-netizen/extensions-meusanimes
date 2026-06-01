@@ -1,4 +1,4 @@
-name: Build Extension
+name: Build All Extensions
 
 on:
   push:
@@ -29,11 +29,12 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Copy extension source to build system
+      - name: Copy MeusAnimes extension source to build system
         run: |
           rm -rf build-system/src/*
           mkdir -p build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes
-          cp -r extension/src/main/java/eu/kanade/tachiyomi/animeextension/br/meusanimes/* build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/
+          cp -r extension/src/main/java/eu/kanade/tachiyomi/animeextension/br/meusanimes/* \
+            build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/
           cp extension/src/main/AndroidManifest.xml build-system/src/pt/meusanimes/
           cat > build-system/src/pt/meusanimes/build.gradle << 'GRADLE'
           ext {
@@ -44,37 +45,128 @@ jobs:
           apply from: "$rootDir/common.gradle"
           GRADLE
 
-      - name: Fix package references in source
+      - name: Fix package references in MeusAnimes source
         run: |
           sed -i 's/package eu.kanade.tachiyomi.animeextension.br.meusanimes/package eu.kanade.tachiyomi.animeextension.pt.meusanimes/g' \
             build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/*.kt
+
+      - name: Copy Anitube extension
+        run: |
+          mkdir -p build-system/src/pt/anitube
+          cp extension/pt/anitube/build.gradle build-system/src/pt/anitube/
+          [ -f extension/pt/anitube/AndroidManifest.xml ] && cp extension/pt/anitube/AndroidManifest.xml build-system/src/pt/anitube/
+          [ -d extension/pt/anitube/src/main/res ] && cp -r extension/pt/anitube/src/main/res build-system/src/pt/anitube/res
+          mkdir -p build-system/src/pt/anitube/src/eu/kanade/tachiyomi/animeextension/pt/anitube
+          cp -r extension/pt/anitube/src/main/java/eu/kanade/tachiyomi/animeextension/pt/anitube/* \
+            build-system/src/pt/anitube/src/eu/kanade/tachiyomi/animeextension/pt/anitube/
+
+      - name: Copy HinataSoul extension
+        run: |
+          mkdir -p build-system/src/pt/hinatasoul
+          cp extension/pt/hinatasoul/build.gradle build-system/src/pt/hinatasoul/
+          [ -f extension/pt/hinatasoul/AndroidManifest.xml ] && cp extension/pt/hinatasoul/AndroidManifest.xml build-system/src/pt/hinatasoul/
+          [ -d extension/pt/hinatasoul/src/main/res ] && cp -r extension/pt/hinatasoul/src/main/res build-system/src/pt/hinatasoul/res
+          mkdir -p build-system/src/pt/hinatasoul/src/eu/kanade/tachiyomi/animeextension/pt/hinatasoul
+          cp -r extension/pt/hinatasoul/src/main/java/eu/kanade/tachiyomi/animeextension/pt/hinatasoul/* \
+            build-system/src/pt/hinatasoul/src/eu/kanade/tachiyomi/animeextension/pt/hinatasoul/
+
+      - name: Copy BetterAnime extension
+        run: |
+          mkdir -p build-system/src/pt/betteranime
+          cp extension/pt/betteranime/build.gradle build-system/src/pt/betteranime/
+          [ -f extension/pt/betteranime/AndroidManifest.xml ] && cp extension/pt/betteranime/AndroidManifest.xml build-system/src/pt/betteranime/
+          [ -d extension/pt/betteranime/src/main/res ] && cp -r extension/pt/betteranime/src/main/res build-system/src/pt/betteranime/res
+          mkdir -p build-system/src/pt/betteranime/src/eu/kanade/tachiyomi/animeextension/pt/betteranime
+          cp -r extension/pt/betteranime/src/main/java/eu/kanade/tachiyomi/animeextension/pt/betteranime/* \
+            build-system/src/pt/betteranime/src/eu/kanade/tachiyomi/animeextension/pt/betteranime/
+
+      - name: Copy RineCloud extension
+        run: |
+          mkdir -p build-system/src/pt/rinecloud
+          cp extension/pt/rinecloud/build.gradle build-system/src/pt/rinecloud/
+          [ -f extension/pt/rinecloud/AndroidManifest.xml ] && cp extension/pt/rinecloud/AndroidManifest.xml build-system/src/pt/rinecloud/
+          [ -d extension/pt/rinecloud/src/main/res ] && cp -r extension/pt/rinecloud/src/main/res build-system/src/pt/rinecloud/res
+          mkdir -p build-system/src/pt/rinecloud/src/eu/kanade/tachiyomi/animeextension/pt/rinecloud
+          cp -r extension/pt/rinecloud/src/main/java/eu/kanade/tachiyomi/animeextension/pt/rinecloud/* \
+            build-system/src/pt/rinecloud/src/eu/kanade/tachiyomi/animeextension/pt/rinecloud/
+
+      - name: Copy AnimesDigital extension
+        run: |
+          mkdir -p build-system/src/pt/animesdigital
+          cp extension/pt/animesdigital/build.gradle build-system/src/pt/animesdigital/
+          [ -f extension/pt/animesdigital/AndroidManifest.xml ] && cp extension/pt/animesdigital/AndroidManifest.xml build-system/src/pt/animesdigital/
+          [ -d extension/pt/animesdigital/src/main/res ] && cp -r extension/pt/animesdigital/src/main/res build-system/src/pt/animesdigital/res
+          mkdir -p build-system/src/pt/animesdigital/src/eu/kanade/tachiyomi/animeextension/pt/animesdigital
+          cp -r extension/pt/animesdigital/src/main/java/eu/kanade/tachiyomi/animeextension/pt/animesdigital/* \
+            build-system/src/pt/animesdigital/src/eu/kanade/tachiyomi/animeextension/pt/animesdigital/
+
+      - name: Copy AnimeFire extension
+        run: |
+          mkdir -p build-system/src/pt/animefire
+          cp extension/pt/animefire/build.gradle build-system/src/pt/animefire/
+          [ -f extension/pt/animefire/AndroidManifest.xml ] && cp extension/pt/animefire/AndroidManifest.xml build-system/src/pt/animefire/
+          [ -d extension/pt/animefire/src/main/res ] && cp -r extension/pt/animefire/src/main/res build-system/src/pt/animefire/res
+          mkdir -p build-system/src/pt/animefire/src/eu/kanade/tachiyomi/animeextension/pt/animefire
+          cp -r extension/pt/animefire/src/main/java/eu/kanade/tachiyomi/animeextension/pt/animefire/* \
+            build-system/src/pt/animefire/src/eu/kanade/tachiyomi/animeextension/pt/animefire/
 
       - name: Add skip metadata version check
         run: |
           sed -i '/freeCompilerArgs += /a\        freeCompilerArgs += "-Xskip-metadata-version-check"' build-system/common.gradle
 
-      - name: Build APK
+      - name: Build all APKs
         working-directory: build-system
-        env:
-          CI_CHUNK_SIZE: "100"
-          CI_CHUNK_NUM: "0"
-        run: ./gradlew -p src :src:pt:meusanimes:assembleDebug --stacktrace
+        run: |
+          ./gradlew -p src \
+            :src:pt:meusanimes:assembleDebug \
+            :src:pt:anitube:assembleDebug \
+            :src:pt:hinatasoul:assembleDebug \
+            :src:pt:betteranime:assembleDebug \
+            :src:pt:rinecloud:assembleDebug \
+            :src:pt:animesdigital:assembleDebug \
+            :src:pt:animefire:assembleDebug \
+            --stacktrace
 
-      - name: Copy APK to repo
+      - name: Copy APKs and icons to repo
         if: success()
         run: |
-          rm -f repo/apk/*.apk
+          rm -rf repo/apk repo/icon
           mkdir -p repo/apk repo/icon
-          apk=$(find build-system -name "*.apk" -type f | head -1)
-          echo "Found APK: $apk"
-          cp "$apk" repo/apk/aniyomi-pt.meusanimes-v14.1.apk
+          # Copy APKs
+          for ext in meusanimes anitube hinatasoul betteranime rinecloud animesdigital animefire; do
+            apk_path=$(find build-system/src/pt/$ext -name "*.apk" -type f | head -1)
+            if [ -n "$apk_path" ]; then
+              base=$(basename "$apk_path")
+              clean_name=$(echo "$base" | sed 's/-debug//')
+              echo "Copying $apk_path -> repo/apk/$clean_name"
+              cp "$apk_path" "repo/apk/$clean_name"
+            else
+              echo "WARNING: No APK found for $ext"
+            fi
+          done
+          # Copy icons (web_hi_res_512.png if exists, else ic_launcher.png)
+          for ext in anitube hinatasoul betteranime rinecloud animesdigital animefire; do
+            icon_dir="repo/icon/$ext"
+            mkdir -p "$icon_dir"
+            for size in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+              src="extension/pt/$ext/src/main/res/mipmap-${size}/ic_launcher.png"
+              if [ -f "$src" ]; then
+                mkdir -p "$icon_dir/mipmap-$size"
+                cp "$src" "$icon_dir/mipmap-$size/"
+              fi
+            done
+            # Also copy web_hi_res if exists
+            src="extension/pt/$ext/src/main/res/web_hi_res_512.png"
+            [ -f "$src" ] && cp "$src" "$icon_dir/"
+          done
+          ls -la repo/apk/
 
-      - name: Commit and push APK
+      - name: Commit and push APKs
         if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git add repo/
-          git diff --cached --quiet || git commit -m "chore: update APK"
+          git diff --cached --quiet || git commit -m "chore: update APKs"
           git push
