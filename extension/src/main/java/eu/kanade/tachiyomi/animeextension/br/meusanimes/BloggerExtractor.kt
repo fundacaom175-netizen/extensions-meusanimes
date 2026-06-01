@@ -2,13 +2,11 @@ package eu.kanade.tachiyomi.animeextension.br.meusanimes
 
 import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.network.GET
-import okhttp3.Headers
 import okhttp3.OkHttpClient
 
 class BloggerExtractor(private val client: OkHttpClient) {
     fun videosFromUrl(url: String, suffix: String = ""): List<Video> {
-        val headers = Headers.of()
-        val html = client.newCall(GET(url, headers)).execute()
+        val html = client.newCall(GET(url)).execute()
             .body!!.string()
             .takeIf { !it.contains("errorContainer") }
             ?: return emptyList()
@@ -29,7 +27,7 @@ class BloggerExtractor(private val client: OkHttpClient) {
                 "37" -> "1080p"
                 else -> "Unknown"
             }
-            Video(videoUrl, "Blogger - $quality $suffix".trimEnd(), videoUrl, headers)
+            Video(videoUrl, "Blogger - $quality $suffix".trimEnd(), videoUrl)
         }
     }
 }
