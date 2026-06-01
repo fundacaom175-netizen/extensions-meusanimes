@@ -14,17 +14,17 @@
 > Task :core:preBuild UP-TO-DATE
 > Task :core:preDebugBuild UP-TO-DATE
 > Task :core:generateDebugResValues UP-TO-DATE
-> Task :src:pt:meusanimes:lintKotlinAndroidTest NO-SOURCE
 > Task :core:generateDebugResources UP-TO-DATE
-> Task :src:pt:meusanimes:lintKotlinAndroidTestDebug NO-SOURCE
-> Task :src:pt:meusanimes:lintKotlinAndroidTestRelease NO-SOURCE
 > Task :core:packageDebugResources UP-TO-DATE
-> Task :src:pt:meusanimes:lintKotlinDebug NO-SOURCE
+> Task :src:pt:meusanimes:lintKotlinAndroidTest NO-SOURCE
 > Task :core:parseDebugLocalResources UP-TO-DATE
+> Task :src:pt:meusanimes:lintKotlinAndroidTestDebug NO-SOURCE
 > Task :core:generateDebugRFile UP-TO-DATE
+> Task :src:pt:meusanimes:lintKotlinAndroidTestRelease NO-SOURCE
 > Task :core:javaPreCompileDebug UP-TO-DATE
 > Task :core:compileDebugJavaWithJavac NO-SOURCE
 > Task :core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :src:pt:meusanimes:lintKotlinDebug NO-SOURCE
 > Task :core:compileDebugLibraryResources UP-TO-DATE
 > Task :core:writeDebugAarMetadata UP-TO-DATE
 > Task :core:extractDeepLinksDebug UP-TO-DATE
@@ -61,25 +61,25 @@
 > Task :src:pt:meusanimes:extractDeepLinksDebug
 > Task :src:pt:meusanimes:processDebugMainManifest
 > Task :src:pt:meusanimes:processDebugManifest
-> Task :src:pt:meusanimes:processDebugManifestForPackage
 > Task :src:pt:meusanimes:javaPreCompileDebug FROM-CACHE
 > Task :src:pt:meusanimes:generateDebugAssets UP-TO-DATE
 > Task :src:pt:meusanimes:mergeDebugAssets
 > Task :src:pt:meusanimes:compressDebugAssets FROM-CACHE
-> Task :src:pt:meusanimes:desugarDebugFileDependencies FROM-CACHE
 > Task :src:pt:meusanimes:checkDebugDuplicateClasses
-> Task :src:pt:meusanimes:mergeDebugJniLibFolders
+> Task :src:pt:meusanimes:desugarDebugFileDependencies FROM-CACHE
 > Task :src:pt:meusanimes:mergeExtDexDebug FROM-CACHE
 > Task :src:pt:meusanimes:mergeLibDexDebug FROM-CACHE
+> Task :src:pt:meusanimes:mergeDebugJniLibFolders
 > Task :src:pt:meusanimes:mergeDebugNativeLibs NO-SOURCE
 > Task :src:pt:meusanimes:stripDebugDebugSymbols NO-SOURCE
 > Task :src:pt:meusanimes:validateSigningDebug
 > Task :src:pt:meusanimes:writeDebugAppMetadata
 > Task :src:pt:meusanimes:writeDebugSigningConfigVersions
+> Task :src:pt:meusanimes:processDebugManifestForPackage
 > Task :src:pt:meusanimes:processDebugResources
 
 > Task :src:pt:meusanimes:compileDebugKotlin FAILED
-e: file:///home/runner/work/extensions-meusanimes/extensions-meusanimes/build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/BloggerExtractor.kt:9:63 Unresolved reference 'EMPTY'.
+e: file:///home/runner/work/extensions-meusanimes/extensions-meusanimes/build-system/src/pt/meusanimes/src/eu/kanade/tachiyomi/animeextension/pt/meusanimes/BloggerExtractor.kt:10:31 'fun of(vararg namesAndValues: String): Headers' is deprecated. function name changed.
 
 FAILURE: Build failed with an exception.
 
