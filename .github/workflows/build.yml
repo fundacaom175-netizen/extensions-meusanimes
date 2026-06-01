@@ -76,7 +76,7 @@ jobs:
         run: |
           set +e
           RESULTS=""
-          for ext in meusanimes anitube hinatasoul betteranime rinecloud animesdigital animefire; do
+          for ext in anitube hinatasoul betteranime rinecloud animesdigital animefire meusanimes; do
             echo "=== Building $ext ==="
             echo "--- Gradle output for $ext ---"
             ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1
