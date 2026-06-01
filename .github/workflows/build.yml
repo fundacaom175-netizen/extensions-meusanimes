@@ -74,31 +74,14 @@ jobs:
           CI_CHUNK_SIZE: 7
           CI_CHUNK_NUM: 0
         run: |
-          set +e
-          RESULTS=""
-          for ext in anitube hinatasoul betteranime rinecloud animesdigital animefire meusanimes; do
-            echo "=== Building $ext ==="
-            if [ "$ext" = "meusanimes" ]; then
-              ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1 | tee /tmp/meusanimes_build.log
-              exit_code=${PIPESTATUS[0]}
-              echo "=== MEUSANIMES BUILD LOG START ==="
-              cat /tmp/meusanimes_build.log
-              echo "=== MEUSANIMES BUILD LOG END ==="
-            else
-              ./gradlew -p src :src:pt:$ext:assembleDebug --stacktrace 2>&1
-              exit_code=$?
-            fi
-            if [ $exit_code -eq 0 ]; then
-              echo "=== SUCCESS: $ext ==="
-              RESULTS="$RESULTS $ext ✓"
-            else
-              echo "=== FAILED: $ext (exit code $exit_code) ==="
-              RESULTS="$RESULTS $ext ✗"
-            fi
-          done
-          echo "========== RESULTS =========="
-          echo "$RESULTS"
-          echo "============================="
+          echo "=== Building ALL extensions in one gradle command ==="
+          ./gradlew -p src :src:pt:meusanimes:assembleDebug :src:pt:anitube:assembleDebug :src:pt:hinatasoul:assembleDebug :src:pt:betteranime:assembleDebug :src:pt:rinecloud:assembleDebug :src:pt:animesdigital:assembleDebug :src:pt:animefire:assembleDebug --stacktrace 2>&1
+          exit_code=$?
+          if [ $exit_code -eq 0 ]; then
+            echo "=== ALL EXTENSIONS BUILT SUCCESSFULLY ==="
+          else
+            echo "=== BUILD FAILED (exit code $exit_code) ==="
+          fi
 
       - name: Inspect build outputs
         run: |
