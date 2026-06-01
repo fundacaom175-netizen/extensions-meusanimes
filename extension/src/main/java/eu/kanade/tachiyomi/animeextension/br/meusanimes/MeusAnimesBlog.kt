@@ -150,12 +150,27 @@ class MeusAnimesBlog : AnimeHttpSource() {
 
         return try {
             val playerHtml = client.newCall(GET(src)).execute().body!!.string()
-            val urls = Regex("""file":\s*"([^"]+)""").findAll(playerHtml)
-                .map { it.groupValues[1] }
-                .distinct()
-                .map { Video(it, "Servidor", it) }
-                .toList()
-            if (urls.isNotEmpty()) urls else emptyList()
+
+            val patterns = listOf(
+                """file":\s*"([^"]+)""".toRegex(),
+                """src":\s*"([^"]+)""".toRegex(),
+                """videoUrl":\s*"([^"]+)""".toRegex(),
+                """<source[^>]+src="([^"]+)""".toRegex(),
+                """<iframe[^>]+src="([^"]+)""".toRegex(),
+            )
+            val urls = patterns.flatMap { regex ->
+                regex.findAll(playerHtml).map { it.groupValues[1] }
+            }.distinct().toList()
+
+            if (urls.isNotEmpty()) {
+                return urls.map { Video(it, "Servidor", it) }
+            }
+
+            if (playerHtml.contains("streams") || playerHtml.contains("blogger")) {
+                return bloggerExtractor.videosFromUrl(src)
+            }
+
+            emptyList()
         } catch (_: Exception) {
             emptyList()
         }
